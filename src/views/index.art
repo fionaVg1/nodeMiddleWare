@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!-- 引入template-web.js -->
+    <script src="./node_modules/art-template/lib/template-web.js"></script>
+</head>
+<body>
+   {{each arr}}
+    <div>
+        <h5>{{$value.title}}</h5>
+        <p>{{$value.content}}</p>
+    </div>
+    {{/each}}
+    <button id='getmes'>发送一个请求</button>
+    <script>
+        $('#getmes').on('click',function(){
+            $.ajax({
+                url:'http://localhost:3300/json1',
+                type:'post',
+                data:{a:123},
+                success:function(data){
+                    console.log(data);
+                }
+            })
+        })
+    </script>
+</body>
+</html>
