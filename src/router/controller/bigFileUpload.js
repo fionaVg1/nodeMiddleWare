@@ -17,10 +17,10 @@ function index(req, res) {
 
         // 切片目录不存在，创建切片目录
         if (!fs.existsSync(fileDir)) {
-            await fs.mkdirs(fileDir);
+            await fs.mkdir(fileDir);
         }
 
-        await fse.move(file.path, `${fileDir}/${context}`);
+        await fs.rename(file.path, `${fileDir}/${context}`);
         res.end("received file chunk");
     });
 }
