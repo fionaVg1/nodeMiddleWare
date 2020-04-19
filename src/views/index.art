@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>        
+    <title>Document</title>   
+    <link rel="stylesheet" href="/css/index.css"/>   
 </head>
 <body>
    {{each arr}}
@@ -14,7 +15,8 @@
     </div>
     {{/each}}
     <button id='getmes'>发送一个请求</button>
-    <div>
+    <div class="bigFileUpload">
+        <h5>大文件上传解决方案</h5>
         <input id="uploadFile" type="file" />
         <button id="uploadBtn">开始上传</button>
     </div>
