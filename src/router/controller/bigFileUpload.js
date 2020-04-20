@@ -9,7 +9,7 @@ function upload(req, res) {
         if (err) {
             return;
         }
-        const [file] = files.file;      
+        const [file] = files.file;
         const [index] = fields.index;
         const [hash] = fields.hash;
         const filename = hash + '_' + index;
@@ -24,41 +24,62 @@ function upload(req, res) {
         res.end("received file chunk");
     });
 }
-const pipeStream = (path,writeStream)=>{
-    new Promise(resolve=>{
+const pipeStream = (path, writeStream) => {
+    return new Promise(resolve => {
         const readStream = fse.createReadStream(path);
-        readStream.on('end',()=>{
+        readStream.on('end', () => {
             fse.unlinkSync(path);
             resolve();
         });
         readStream.pipe(writeStream);
     })
 }
-async function merge(req,res){
+async function merge(req, res) {
     const hash = req.query.hash;
     const size = req.query.size;
     const fileName = req.query.fileName;
-    const fileDir = path.resolve(UPLOAD_DIR,hash);
+    const fileDir = path.resolve(UPLOAD_DIR, hash);
     const filePaths = await fse.readdir(fileDir);
     //根据切片的index进行排序
-    filePaths.sort((value,value2)=>{
-        return value.split('-')[1]-value2.split('-')[1]
+    filePaths.sort((value, value2) => {
+        return value.split('-')[1] - value2.split('-')[1]
     });
+    let promises = [];
+    filePaths.map((filePath, index) => {
+        promises.push(pipeStream(path.resolve(fileDir, filePath), fse.createWriteStream(`${fileDir}/${fileName}`, { start: index * size, end: (index + 1) * size })));
+    })
     Promise.all(
-        filePaths.map((filePath,index)=>{
-            pipeStream(path.resolve(fileDir,filePath),fse.createWriteStream(`${fileDir}/${fileName}`,{start:index*size,end:(index+1)*size}));
-            
-        })
-    ).then(()=>{
+        promises
+    ).then(() => {
         //合并完以后删除切片目录   
         fse.rmdir(fileDir);
         res.end(
             JSON.stringify({
-                code:200,
-                message:'file merged success'
+                code: 200,
+                message: 'file merged success'
             })
         );
     })
-    
 }
-module.exports = {upload:upload,merge:merge};
+
+function verify(req, res) {
+    const hash = req.query.hash;
+    const fileName = req.query.fileName;
+    const fileDir = path.resolve(UPLOAD_DIR, hash);
+    const filePath = path.resolve(UPLOAD_DIR, `${hash}/${fileName}`);
+    if (fse.existsSync(filePath)) {
+        res.end(JSON.stringify({
+            isUploaded: true
+        }));
+    } else {
+        let uploadedList = fse.readdir(fileDir) || [];
+        res.end(
+            JSON.stringify({
+                isUploaded: false,
+                uploadedList: uploadedList
+            })
+        );
+    }
+
+}
+module.exports = { upload: upload, merge: merge, verify: verify };

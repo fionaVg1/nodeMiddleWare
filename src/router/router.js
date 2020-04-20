@@ -6,5 +6,6 @@ let bigFile = require('./controller/bigFileUpload.js');
 router.get('/', index);
 router.post('/json1', json1);
 router.post('/upload/bigFile', bigFile.upload);
-router.get('/upload/done',bigFile.merge);
+router.get('/upload/done', bigFile.merge);
+router.get('/upload/verify', bigFile.verify);
 module.exports = router;

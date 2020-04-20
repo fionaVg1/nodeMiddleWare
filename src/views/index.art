@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>   
-    <link rel="stylesheet" href="/css/index.css"/>   
+    <link rel="stylesheet" href = "/css/jquery-ui.css"/>
+    <link rel="stylesheet" href="/css/index.css"/>  
 </head>
 <body>
    {{each arr}}
@@ -17,10 +18,18 @@
     <button id='getmes'>发送一个请求</button>
     <div class="bigFileUpload">
         <h5>大文件上传解决方案</h5>
+        <div id="progressbar">
+            <div class="progress-label">
+                加载...
+            </div>
+        </div>
         <input id="uploadFile" type="file" />
         <button id="uploadBtn">开始上传</button>
+        <button id="stopUpload">暂停上传</button>
+        <button id="resumeUpload">恢复上传</button>
     </div>
     <script src="/js/jquery.js"></script>
+    <script src="/js/jquery-ui.js"></script>
     <script src="/js/bigFileUpload.js"></script>
     <script>
         $('#getmes').on('click',function(){
