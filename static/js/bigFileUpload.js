@@ -11,6 +11,7 @@ let loaded = 0;
 let requestList = [];
 let uploadedList = [];
 let isUploaded = false;
+let fileHash;
 class Util {
     // 生成文件 hash（web-worker）   
     static calculateHash(fileChunkList) {
@@ -63,25 +64,17 @@ class Util {
                     fileName: fileName,
                 },
                 success: function(res) {
-                    this.uploadedList = res.uploadedList;
-                    this.isUploaded = res.isUploaded;
+                    res = JSON.parse(res);
+                    uploadedList = res.uploadedList;
+                    isUploaded = res.isUploaded;
                 }
             })
         }
-        //上传切片
-    static async uploadChunks(fileChunkList, file) {
-        var fileHash = await Util.calculateHash(fileChunkList);
-        Util.verifyUploaded(file.name, fileHash);
-        if (isUploaded) {
-            alert('[已经上传过]--上传成功');
-            return;
-        }
-        const requestList = fileChunkList.filter((data) => {
-            return !uploadedList.includes(fileHash + '_' + data.index);
-        });
-        Promise.all(
+        //获取切片上传的promises
+    static getPromises(requestList, fileHash, file) {
+            let promises = [];
             requestList.map(function(fileChunk) {
-                new Promise(resovle => {
+                let promise = new Promise(resovle => {
                     const formData = new FormData();
                     formData.append("file", fileChunk.file);
                     formData.append("index", fileChunk.index);
@@ -124,7 +117,26 @@ class Util {
                         error: function() {}
                     });
                 });
-            })
+                promises.push(promise);
+            });
+            return promises;
+        }
+        //上传切片
+    static async uploadChunks(fileChunkList, file) {
+        if (!fileHash) {
+            fileHash = await Util.calculateHash(fileChunkList);
+        }
+        Util.verifyUploaded(file.name, fileHash);
+        if (isUploaded) {
+            alert('[已经上传过]--上传成功');
+            return;
+        }
+        const requestList = fileChunkList.filter((data) => {
+            return !uploadedList.includes(fileHash + '_' + data.index);
+        });
+        let promises = Util.getPromises(requestList, fileHash, file);
+        Promise.all(
+            promises
         ).then(() => {
             //所有切片生成完以后进行切片合并
             $.ajax({
